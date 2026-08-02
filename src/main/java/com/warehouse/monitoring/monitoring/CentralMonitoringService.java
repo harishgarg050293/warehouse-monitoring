@@ -49,14 +49,10 @@ public class CentralMonitoringService {
     }
 
     private void raiseAlarm(SensorMeasurement measurement, double threshold) {
-        String unit = measurement.type() == SensorType.TEMPERATURE ? "°C" : "%";
-        log.error("ALARM: {} sensor '{}' in warehouse '{}' reported value={}{} which exceeds threshold {}{}",
+        log.error("ALARM: {} sensor {} value={} exceeds threshold {}",
                 measurement.type().name().toLowerCase(),
                 measurement.sensorId(),
-                measurement.warehouseId(),
                 measurement.value(),
-                unit,
-                threshold,
-                unit);
+                threshold);
     }
 }

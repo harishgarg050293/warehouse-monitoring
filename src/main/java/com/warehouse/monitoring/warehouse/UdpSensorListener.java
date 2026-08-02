@@ -6,7 +6,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,10 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Warehouse service: receives UDP sensor datagrams and forwards them to the central monitoring
- * service via the message broker.
- */
 @Component
 public class UdpSensorListener {
 
@@ -33,8 +28,7 @@ public class UdpSensorListener {
     private final MeasurementParser parser;
     private final WarehousePublisher publisher;
     private final String warehouseId;
-    private final int temperaturePort;
-    private final int humidityPort;
+    private final List<WarehouseProperties.SensorConfig> sensors;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<DatagramSocket> sockets = new ArrayList<>();
@@ -43,14 +37,11 @@ public class UdpSensorListener {
     public UdpSensorListener(
             MeasurementParser parser,
             WarehousePublisher publisher,
-            @Value("${warehouse.id:warehouse-1}") String warehouseId,
-            @Value("${warehouse.udp.temperature-port:3344}") int temperaturePort,
-            @Value("${warehouse.udp.humidity-port:3355}") int humidityPort) {
+            WarehouseProperties warehouse) {
         this.parser = parser;
         this.publisher = publisher;
-        this.warehouseId = warehouseId;
-        this.temperaturePort = temperaturePort;
-        this.humidityPort = humidityPort;
+        this.warehouseId = warehouse.id();
+        this.sensors = warehouse.sensors();
     }
 
     @PostConstruct
@@ -59,17 +50,12 @@ public class UdpSensorListener {
             return;
         }
 
-        executor = Executors.newFixedThreadPool(2, r -> {
-            Thread t = new Thread(r);
-            t.setName("udp-sensor-listener");
-            t.setDaemon(true);
-            return t;
-        });
+        executor = Executors.newVirtualThreadPerTaskExecutor();
 
-        bindAndListen(temperaturePort, SensorType.TEMPERATURE);
-        bindAndListen(humidityPort, SensorType.HUMIDITY);
-        log.info("Warehouse service '{}' listening for temperature on UDP {} and humidity on UDP {}",
-                warehouseId, temperaturePort, humidityPort);
+        for (WarehouseProperties.SensorConfig sensor : sensors) {
+            bindAndListen(sensor.port(), sensor.type());
+        }
+        log.info("Warehouse '{}' listening on sensors: {}", warehouseId, sensors);
     }
 
     @PreDestroy

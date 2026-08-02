@@ -58,12 +58,12 @@ sensor_id=h1; value=40
 | Temperature | 3344     | 35 °C              |
 | Humidity    | 3355     | 50 %               |
 
-Configure in `src/main/resources/application.yml` under `monitoring.thresholds` and `warehouse.udp`.
+Sensors are configured under `warehouse.sensors` in `application.yml`. To add a new sensor type, add an entry with `type` and `port` (and a matching threshold in `monitoring.thresholds`).
 
 ## Example alarm
 
 ```
-ALARM: temperature sensor 't1' in warehouse 'warehouse-1' reported value=36.0°C which exceeds threshold 35.0°C
+ALARM: temperature sensor t1 value=36 exceeds threshold 35
 ```
 
 ## Tests

@@ -9,9 +9,11 @@ spring:
 
 warehouse:
   id: warehouse-1
-  udp:
-    temperature-port: 3344
-    humidity-port: 3355
+  sensors:
+    - type: temperature
+      port: 3344
+    - type: humidity
+      port: 3355
 
 monitoring:
   thresholds:

@@ -32,8 +32,10 @@ class WarehouseMonitoringIntegrationTest {
 
     @DynamicPropertySource
     static void udpPorts(DynamicPropertyRegistry registry) {
-        registry.add("warehouse.udp.temperature-port", () -> TEMP_PORT);
-        registry.add("warehouse.udp.humidity-port", () -> HUM_PORT);
+        registry.add("warehouse.sensors[0].type", () -> "temperature");
+        registry.add("warehouse.sensors[0].port", () -> TEMP_PORT);
+        registry.add("warehouse.sensors[1].type", () -> "humidity");
+        registry.add("warehouse.sensors[1].port", () -> HUM_PORT);
     }
 
     @Autowired
