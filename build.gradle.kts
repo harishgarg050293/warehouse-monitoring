@@ -32,3 +32,10 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.register<JavaExec>("sendSensor") {
+    group = "application"
+    description = "Send a simulated UDP sensor reading"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.warehouse.monitoring.tools.SensorSimulator")
+}
