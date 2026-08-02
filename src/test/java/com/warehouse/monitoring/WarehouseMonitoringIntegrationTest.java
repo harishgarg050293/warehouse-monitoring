@@ -96,8 +96,8 @@ class WarehouseMonitoringIntegrationTest {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             assertThat(output.getOut()).contains("warehouseId=warehouse-1");
             assertThat(output.getOut()).contains("warehouseId=warehouse-2");
-            assertThat(output.getOut()).contains("ALARM: temperature sensor t1");
-            assertThat(output.getOut()).contains("ALARM: temperature sensor t2");
+            assertThat(output.getOut()).contains("ALARM: warehouse=warehouse-1 temperature sensor t1");
+            assertThat(output.getOut()).contains("ALARM: warehouse=warehouse-2 temperature sensor t2");
         });
     }
 
@@ -108,7 +108,7 @@ class WarehouseMonitoringIntegrationTest {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
                 assertThat(output.getOut())
                         .contains("warehouseId=warehouse-2")
-                        .contains("ALARM: temperature sensor t2"));
+                        .contains("ALARM: warehouse=warehouse-2 temperature sensor t2"));
     }
 
     private static void sendUdp(int port, String payload) throws IOException {

@@ -49,7 +49,8 @@ public class CentralMonitoringService {
     }
 
     private void raiseAlarm(SensorMeasurement measurement, double threshold) {
-        log.error("ALARM: {} sensor {} value={} exceeds threshold {}",
+        log.error("ALARM: warehouse={} {} sensor {} value={} exceeds threshold {}",
+                measurement.warehouseId(),
                 measurement.type().name().toLowerCase(),
                 measurement.sensorId(),
                 measurement.value(),

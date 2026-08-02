@@ -69,7 +69,7 @@ Warehouses and sensors are configured under `warehouses` in `application.yml`. T
 ## Example alarm
 
 ```
-ALARM: temperature sensor t1 value=36 exceeds threshold 35
+ALARM: warehouse=warehouse-1 temperature sensor t1 value=36 exceeds threshold 35
 ```
 
 ## Tests
