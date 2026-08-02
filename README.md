@@ -40,10 +40,10 @@ Expected startup log includes UDP listeners on ports `3344` (temperature) and `3
 With the app running (`gradlew.bat bootRun`), send readings from another terminal:
 
 ```bat
-gradlew.bat sendSensor --args="warehouse-1 temperature t1 30"
-gradlew.bat sendSensor --args="warehouse-1 temperature t1 36"
-gradlew.bat sendSensor --args="warehouse-2 temperature t2 36"
-gradlew.bat sendSensor --args="warehouse-2 humidity h2 55"
+./gradlew.bat sendSensor --args="warehouse-1 temperature t1 30"
+./gradlew.bat sendSensor --args="warehouse-1 temperature t1 36"
+./gradlew.bat sendSensor --args="warehouse-2 temperature t2 36"
+./gradlew.bat sendSensor --args="warehouse-2 humidity h2 55"
 ```
 
 Arguments: `<warehouse> <temperature|humidity> <sensorId> <value> [host]`
