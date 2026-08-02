@@ -7,13 +7,19 @@ spring:
     template:
       default-destination: sensor.measurements
 
-warehouse:
-  id: warehouse-1
-  sensors:
-    - type: temperature
-      port: 3344
-    - type: humidity
-      port: 3355
+warehouses:
+  - id: warehouse-1
+    sensors:
+      - type: temperature
+        port: 3344
+      - type: humidity
+        port: 3355
+  - id: warehouse-2
+    sensors:
+      - type: temperature
+        port: 4344
+      - type: humidity
+        port: 4355
 
 monitoring:
   thresholds:

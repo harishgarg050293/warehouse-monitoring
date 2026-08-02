@@ -27,8 +27,7 @@ public class UdpSensorListener {
 
     private final MeasurementParser parser;
     private final WarehousePublisher publisher;
-    private final String warehouseId;
-    private final List<WarehouseProperties.SensorConfig> sensors;
+    private final List<WarehousesProperties.WarehouseConfig> warehouses;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<DatagramSocket> sockets = new ArrayList<>();
@@ -37,11 +36,10 @@ public class UdpSensorListener {
     public UdpSensorListener(
             MeasurementParser parser,
             WarehousePublisher publisher,
-            WarehouseProperties warehouse) {
+            WarehousesProperties warehousesProperties) {
         this.parser = parser;
         this.publisher = publisher;
-        this.warehouseId = warehouse.id();
-        this.sensors = warehouse.sensors();
+        this.warehouses = warehousesProperties.warehouses();
     }
 
     @PostConstruct
@@ -52,10 +50,12 @@ public class UdpSensorListener {
 
         executor = Executors.newVirtualThreadPerTaskExecutor();
 
-        for (WarehouseProperties.SensorConfig sensor : sensors) {
-            bindAndListen(sensor.port(), sensor.type());
+        for (WarehousesProperties.WarehouseConfig warehouse : warehouses) {
+            for (WarehousesProperties.SensorConfig sensor : warehouse.sensors()) {
+                bindAndListen(warehouse.id(), sensor.port(), sensor.type());
+            }
         }
-        log.info("Warehouse '{}' listening on sensors: {}", warehouseId, sensors);
+        log.info("Listening for warehouses: {}", warehouses);
     }
 
     @PreDestroy
@@ -75,13 +75,13 @@ public class UdpSensorListener {
         }
     }
 
-    private void bindAndListen(int port, SensorType type) throws SocketException {
+    private void bindAndListen(String warehouseId, int port, SensorType type) throws SocketException {
         DatagramSocket socket = new DatagramSocket(port);
         sockets.add(socket);
-        executor.submit(() -> listenLoop(socket, type));
+        executor.submit(() -> listenLoop(socket, warehouseId, type));
     }
 
-    private void listenLoop(DatagramSocket socket, SensorType type) {
+    private void listenLoop(DatagramSocket socket, String warehouseId, SensorType type) {
         byte[] buffer = new byte[1024];
         while (running.get() && !socket.isClosed()) {
             try {
@@ -89,25 +89,25 @@ public class UdpSensorListener {
                 socket.receive(packet);
                 String payload = new String(packet.getData(), packet.getOffset(), packet.getLength(), StandardCharsets.UTF_8)
                         .trim();
-                handlePayload(payload, type);
+                handlePayload(payload, warehouseId, type);
             } catch (SocketException e) {
                 if (running.get()) {
-                    log.warn("UDP socket error on {}: {}", type, e.getMessage());
+                    log.warn("UDP socket error on {} for {}: {}", type, warehouseId, e.getMessage());
                 }
             } catch (IOException e) {
                 if (running.get()) {
-                    log.warn("Failed to receive UDP packet for {}: {}", type, e.getMessage());
+                    log.warn("Failed to receive UDP packet for {} in {}: {}", type, warehouseId, e.getMessage());
                 }
             } catch (Exception e) {
-                log.error("Unexpected error while processing {} measurement", type, e);
+                log.error("Unexpected error while processing {} measurement for {}", type, warehouseId, e);
             }
         }
     }
 
-    void handlePayload(String payload, SensorType type) {
+    void handlePayload(String payload, String warehouseId, SensorType type) {
         parser.parse(payload, type, warehouseId).ifPresentOrElse(
                 publisher::publish,
-                () -> log.warn("Ignoring invalid {} payload: '{}'", type, payload)
+                () -> log.warn("Ignoring invalid {} payload for {}: '{}'", type, warehouseId, payload)
         );
     }
 }

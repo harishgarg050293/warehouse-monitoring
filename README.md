@@ -35,14 +35,18 @@ Expected startup log includes UDP listeners on ports `3344` (temperature) and `3
 
 ## Simulate sensors
 
-### PowerShell helper
+### Java sensor simulator
 
-```powershell
-.\tools\send-sensor.ps1 -Type temperature -SensorId t1 -Value 30
-.\tools\send-sensor.ps1 -Type temperature -SensorId t1 -Value 36
-.\tools\send-sensor.ps1 -Type humidity -SensorId h1 -Value 40
-.\tools\send-sensor.ps1 -Type humidity -SensorId h1 -Value 55
+With the app running (`gradlew.bat bootRun`), send readings from another terminal:
+
+```bat
+gradlew.bat sendSensor --args="warehouse-1 temperature t1 30"
+gradlew.bat sendSensor --args="warehouse-1 temperature t1 36"
+gradlew.bat sendSensor --args="warehouse-2 temperature t2 36"
+gradlew.bat sendSensor --args="warehouse-2 humidity h2 55"
 ```
+
+Arguments: `<warehouse> <temperature|humidity> <sensorId> <value> [host]`
 
 ### Manual UDP (payload format from the assignment)
 
@@ -53,12 +57,14 @@ sensor_id=h1; value=40
 
 ## Thresholds (defaults)
 
-| Sensor      | UDP port | Alarm when value > |
-|-------------|----------|--------------------|
-| Temperature | 3344     | 35 °C              |
-| Humidity    | 3355     | 50 %               |
+| Warehouse   | Sensor      | UDP port | Alarm when value > |
+|-------------|-------------|----------|--------------------|
+| warehouse-1 | Temperature | 3344     | 35 °C              |
+| warehouse-1 | Humidity    | 3355     | 50 %               |
+| warehouse-2 | Temperature | 4344     | 35 °C              |
+| warehouse-2 | Humidity    | 4355     | 50 %               |
 
-Sensors are configured under `warehouse.sensors` in `application.yml`. To add a new sensor type, add an entry with `type` and `port` (and a matching threshold in `monitoring.thresholds`).
+Warehouses and sensors are configured under `warehouses` in `application.yml`. To add another warehouse, add a new list entry with a unique `id` and non-conflicting sensor ports.
 
 ## Example alarm
 
@@ -80,6 +86,6 @@ Coverage includes:
 
 ## Design notes
 
-- Sensor intake uses dedicated UDP listener threads; measurements are published asynchronously through JMS.
+- One JVM listens for all configured warehouses; each UDP port is tied to a warehouse id and sensor type.
 - JSON message conversion is used on the Artemis queue `sensor.measurements`.
-- Multiple warehouses can be represented via `warehouse.id` (default `warehouse-1`); the central service monitors all published measurements against shared thresholds.
+- Central monitoring applies shared thresholds to measurements from every warehouse.

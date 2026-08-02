@@ -5,8 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
-@ConfigurationProperties(prefix = "warehouse")
-public record WarehouseProperties(String id, List<SensorConfig> sensors) {
+@ConfigurationProperties(prefix = "")
+public record WarehousesProperties(List<WarehouseConfig> warehouses) {
+
+    public record WarehouseConfig(String id, List<SensorConfig> sensors) {
+    }
 
     public record SensorConfig(SensorType type, int port) {
     }
