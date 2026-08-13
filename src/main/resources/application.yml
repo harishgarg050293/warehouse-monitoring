@@ -30,5 +30,7 @@ logging:
   level:
     root: INFO
     com.warehouse.monitoring: INFO
+    org.apache.activemq.audit: WARN
+    org.apache.activemq.artemis: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
