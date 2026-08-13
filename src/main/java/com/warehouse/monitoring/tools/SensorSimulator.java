@@ -20,8 +20,8 @@ public final class SensorSimulator {
     private static final Logger log = LoggerFactory.getLogger(SensorSimulator.class);
 
     private static final Map<String, Map<String, Integer>> PORTS = Map.of(
-            "warehouse-1", Map.of("temperature", 3344, "humidity", 3355),
-            "warehouse-2", Map.of("temperature", 4344, "humidity", 4355)
+            "warehouse-1", Map.of("temperature", 3344, "humidity", 3355, "pressure", 3366),
+            "warehouse-2", Map.of("temperature", 4344, "humidity", 4355, "pressure", 4366)
     );
 
     private SensorSimulator() {
